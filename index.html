@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<head>
+    <title>Pusher Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.0beta1/esri/css/esri.css">
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/4.0beta1/"></script>
+    <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
+    <script>
+        // Enable pusher logging - don't include this in production
+        Pusher.log = function (message) {
+            if (window.console && window.console.log) {
+                window.console.log(message);
+            }
+        };
+
+        var pusher = new Pusher('a7fb12c2db518495aeb4', {
+            encrypted: true
+        });
+        var channel = pusher.subscribe('flight');
+        channel.bind('message', function (data) {
+            alert(data.message);
+        });
+        channel.bind('location', function (data) {
+            alert(data.message);
+        });
+
+
+        var map, view;
+        require([
+                    "esri/Map",
+                    "esri/views/SceneView",
+                    "dojo/domReady!"
+                ],
+                function(Map, SceneView) {
+                    map = new Map({
+                        basemap: "topo"
+                    });
+                    view = new SceneView({
+                        container: "viewDiv",
+                        map: map,
+                        scale: 50000000,
+                        center: [-101.17, 21,78]
+                    });
+                });
+    </script>
+</head>
+<body>
+    <div id="viewDiv"></div>
+</body>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Simple 3D Map</title></p>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.0beta1/esri/css/esri.css">
+    <script src="https://js.arcgis.com/4.0beta1/"></script>
+    <script>
+        var map, view, gl;
+        require([
+            "esri/Graphic","esri/geometry/Point",
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/FeatureLayer","esri/layers/GraphicsLayer",
+            "esri/renderers/SimpleRenderer",
+            "esri/symbols/PointSymbol3D",
+            "esri/symbols/IconSymbol3DLayer",
+            "esri/symbols/ObjectSymbol3DLayer",
+            "esri/symbols/PictureMarkerSymbol",
+            "dojo/on",
+            "dojo/dom",
+            "esri/geometry/Polyline",
+            "esri/symbols/SimpleLineSymbol",
+            "dojo/domReady!"
+        ], function(Graphic, Point, Map, SceneView, FeatureLayer, GraphicsLayer, SimpleRenderer, PointSymbol3D,
+                    IconSymbol3DLayer, ObjectSymbol3DLayer, PictureMarkerSymbol,
+                    on, dom, Polyline, SimpleLineSymbol ) {
+            var iconSymbol, iconSymbolRenderer, objectSymbol,
+                    objectSymbolRenderer, featureLayer;
+
+            //Create Map
+            map = new Map({
+                basemap: "topo"
+            });
+
+            //Create SceneView and set viewpoint
+            view = new SceneView({
+                container: "viewDiv",
+                map: map,
+                camera: {
+                    position: [-81.76, 16.77, 1932626],
+                    tilt: 40,
+                    zoom: 5.8
+                }
+            });
+
+            //Create iconSymbol and add to renderer
+            iconSymbol = new PointSymbol3D({
+                symbolLayers: [new IconSymbol3DLayer({
+                    size: 24,
+                    resource: {
+                        primitive: "square"
+                    }
+                })]
+            });
+            iconSymbolRenderer = new SimpleRenderer({
+                symbol: iconSymbol
+            });
+
+            //Request feature layers and overwrite renderer
+
+
+            graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
+
+            gl = function (latlng) {
+                graphicsLayer.clear()
+
+                var point = new Point(latlng.lat, latlng.lng)
+                var symbol = new PictureMarkerSymbol("plane.gif", 320, 320);
+                var pointGraphic = new Graphic({
+                    geometry: point,
+                    symbol: new PointSymbol3D({
+                        symbolLayers: [new IconSymbol3DLayer({
+                            size: 24,
+                            resource: {
+                                primitive: "square"
+                            }
+                        })]
+                    })
+                });
+
+                pointGraphic = new Graphic({
+                    geometry: point,
+                    symbol: symbol
+                });
+                graphicsLayer.add(pointGraphic);
+
+//                var polyline = new Polyline([
+//                            [latlng.lat, latlng.lng, 0],
+//                            [latlng.lat, latlng.lng, 10000]
+//                        ]),
+//
+//                        lineSymbol = new SimpleLineSymbol({
+//                            color: [226, 119, 40],
+//                            width: 40
+//                        });
+//
+//                var polylineGraphic = new Graphic({
+//                    geometry: polyline,
+//                    symbol: lineSymbol
+//                });
+//
+//                graphicsLayer.add(polylineGraphic);
+            }
+        });
+    </script>
+    <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
+    <script>
+        // Enable pusher logging - don't include this in production
+        Pusher.log = function (message) {
+            if (window.console && window.console.log) {
+                window.console.log(message);
+            }
+        };
+
+        var pusher = new Pusher('a7fb12c2db518495aeb4', {
+            encrypted: true
+        });
+        var channel = pusher.subscribe('flight');
+        channel.bind('message', function (data) {
+            document.getElementById("y").innerHTML = data.message;
+        });
+        channel.bind('location', function (data) {
+            view.animateTo([parseInt(data.lat), parseInt(data.lng)])
+            gl(data)
+        });
+        var pres = pusher.subscribe('presence-all');
+        pres.bind('client-all', function (data) {
+            console.log(data)
+            document.getElementById("y").innerHTML = data.message;
+        });
+
+        function sendit() {
+            console.log("HKLJHLJ")
+            pres.trigger('client-all',{message:document.getElementById('msg').value})
+        }
+    </script>
+</head>
+<body>
+<div id="x" style="position: absolute; top: 5px; left: 100px; background-color: rgba(255,255,255,0.5); font-size: 35pt">
+    <input type="text" id="msg" /><button onclick="sendit()">Send to all passengers</button>
+    <div id="y"></div>
+</div>
+<div id="viewDiv"></div>
+</body>
+</html>

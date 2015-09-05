@@ -1,0 +1,26 @@
+{
+  "name": "PlaneCrash-server",
+  "version": "0.0.1",
+  "description": "Server for plane crash software GeoHackDays 2015",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bcaller/PlaneCrash.git"
+  },
+  "author": "Ben Caller",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bcaller/PlaneCrash/issues"
+  },
+  "homepage": "https://github.com/bcaller/PlaneCrash",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "csv-to-array": "^1.0.1",
+    "express": "^4.13.3",
+    "lodash": "^3.10.1",
+    "pusher": "^1.0.6"
+  }
+}
